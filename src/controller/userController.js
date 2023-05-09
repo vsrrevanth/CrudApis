@@ -10,11 +10,12 @@ var getAllUsers = async () => {
     return null
 }
 // get user
-var getUser=async (firstname)=>{
+var getUser=async (email)=>{
     //console.log("userController: "+"The firstname from the request is: "+firstname)
-    var rows = await userModel.getUser(firstname);
-    if(rows){
-        user = rows[0];
+    var rows = await userModel.getUser(email);
+    var results = rows[0]
+    if(results){
+        user = results[0];
         return user
     }
     return null
@@ -31,20 +32,17 @@ var createUser= async (req,res)=>{
 
 // update user
 var updateUser = async (req)=>{
-    var rowsAffected = await userModel.updateUser(req.body, req.query.id);
-    console.log(rowsAffected)
-    if(rowsAffected>=1){
-        return true
+    var user = await userModel.updateUser(req.body, req.query.email);
+    if(user){
+        user = user[0][0];
+        return user;
     }
-    if(rowsAffected==0){
-        return "User with such Id doesn't exist to update"
-    }
-    return rowsAffected;
+    return null
 }
 
 // delete user
 var deleteUser = async (req)=>{
-    var rowsAffected = await userModel.deleteUser(req.query.id);
+    var rowsAffected = await userModel.deleteUser(req.query.email);
     if(rowsAffected>=1){
         return true;
     }

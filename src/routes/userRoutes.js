@@ -24,17 +24,16 @@ router.get("/users", async (req, res) => {
     }
 })
 
-//Get User with Firstname
+//Get User with email
 router.get("/user", async (req,res)=>{
     try{
-        var firstname = req.query.firstname;
-        console.log(typeof(firstname))
-        if(searchUserSchema.validate({firstname:firstname}).error){
-            return res.status(400).send(searchUserSchema.validate({firstname:firstname}).error.details)
+        var email = req.query.email;
+        if(searchUserSchema.validate({email:email}).error){
+            return res.status(400).send(searchUserSchema.validate({email:email}).error.details)
         }
 
-        const user = await userController.getUser(firstname);
-        if(user.length !=0){
+        const user = await userController.getUser(email);
+        if(user){
             return res.json(user);
         }
         return res.json({"message": "unable to fetch user details"})
@@ -51,9 +50,8 @@ router.post("/user",async (req,res)=>{
             console.log("Invalid schema")
             return res.status(400).send(createUserSchema.validate(req.body).error.details)
         }
-        const existingUser = await userController.getUser(req.body.firstname);
-        if(existingUser.length!=0){
-            console.log("User exists", existingUser)
+        const existingUser = await userController.getUser(req.body.email);
+        if(existingUser){
             return res.status(400).json({"error": "User already exists"})
         }
         result = await userController.createUser(req)
@@ -74,14 +72,17 @@ router.post("/user",async (req,res)=>{
 //Update User
 router.put("/user",async (req,res)=>{
     try{
-        result = await userController.updateUser(req)
-        if(result == true){
-            return res.json({"message":"User Updated successfully"})
+        var user = await userController.getUser(req.query.email);
+        if(user){
+            user = await userController.updateUser(req)
+            return res.json(user);
         }
-        return res.json({
-            "message":"Failed to update the user",
-            error:result
-        });
+        else{
+            return res.status(404).json({
+                "error": `User with email ${req.query.email} doesn't exist`
+            })
+        }
+        
     }
     catch(error){
         res.json({
@@ -93,16 +94,17 @@ router.put("/user",async (req,res)=>{
 //Delete User
 router.delete("/user",async (req,res)=>{
     try{
-        result = await userController.deleteUser(req);
-        if(result == true){
-            return res.json({
-                "message":"User deleted Successfully"
+        var user = await userController.getUser(req.query.email);
+        if(user){
+            await userController.deleteUser(req);
+            return res.status(200).json({
+                message:"User deleted"
+            })
+        }else{
+            return res.status(404).json({
+                "error": `User with email ${req.query.email} doesn't exist`
             })
         }
-        return res.json({
-            "message":"Failed to delete the user",
-            error:result
-        });
     }
     catch(error){
         res.json({

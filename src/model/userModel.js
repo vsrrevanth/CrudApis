@@ -15,29 +15,26 @@ var getConnection = async ({host, port, database, user, password}) => {
 }
 
 // Get All Users
-
 var getAllUsers = async () => {
-    let sql = `select * from users`;
+    let sql = `select * from user_details`;
     const conn = await getConnection(connection_params)
     var rows = await conn.query(sql)
     return rows
 }
 
 // Get User
-
-var getUser = async (firstname) => {
-    let sql = `select * from users where FirstName=?`;
-    let values = [firstname]
+var getUser = async (email) => {
+    let sql = `select * from user_details where email=?`;
+    let values = [email]
     const conn = await getConnection(connection_params);
     var rows = await conn.query(sql,values)
     return rows
 }
 
 // Create User
-
 var createUser = async ({firstname,lastname,email,address,phonenumber}) => {
     try{
-    let sql = `insert into users (FirstName,LastName,email,address,phonenumber) values(?,?,?,?,?)`;
+    let sql = `insert into user_details (FirstName,LastName,email,address,phonenumber) values(?,?,?,?,?)`;
     let values = [firstname,lastname,email,address,phonenumber];
     const conn = await getConnection(connection_params);
     var rows = await conn.query(sql,values)
@@ -50,23 +47,22 @@ var createUser = async ({firstname,lastname,email,address,phonenumber}) => {
 }
 
 // Update User
-
-var updateUser = async (fields, id) => {
+var updateUser = async (fields, email) => {
     console.log()
     try{
+        const oldUserObj = getUser(email);
         if(Object.keys(fields).length == 0){
-            return 0;
+            return oldUserObj;
         }  
         var updates = []
         for(var column of Object.keys(fields)){
             updates.push(`${column}='${fields[column]}'`);
         }
-        var updateQuery = "UPDATE users SET "+updates.join(",")+" WHERE id="+id+";";
+        var updateQuery = "UPDATE user_details SET "+updates.join(",")+" WHERE email='"+email+"';";
         const conn = await getConnection(connection_params);
-        var rows = await conn.query(updateQuery);
-        rows = rows[0];
-        console.log("rows: "+rows['affectedRows'])
-        return rows['affectedRows'];
+        await conn.query(updateQuery);
+        const newUserObj = getUser(email);
+        return newUserObj;
         }
     
     catch(error){
@@ -76,10 +72,10 @@ var updateUser = async (fields, id) => {
 }
 
 // Delete User
-var deleteUser = async (id) => {
+var deleteUser = async (email) => {
     try{
-    let sql = `delete from users where id = ?`;
-    let values = [id]
+    let sql = `delete from user_details where email = ?`;
+    let values = [email]
     const conn = await getConnection(connection_params);
     var rows = await conn.query(sql,values)
     rows = rows[0];
