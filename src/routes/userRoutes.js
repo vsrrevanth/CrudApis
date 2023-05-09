@@ -5,7 +5,7 @@ const userController = require("../controller/userController")
 const searchUserSchema = require("../schemas/searchUser")
 const createUserSchema = require("../schemas/createUser")
 
-
+//Get all Users
 router.get("/users", async (req, res) => {
     try{
         const users = await userController.getAllUsers();
@@ -24,6 +24,7 @@ router.get("/users", async (req, res) => {
     }
 })
 
+//Get User with Firstname
 router.get("/user", async (req,res)=>{
     try{
         var firstname = req.query.firstname;
@@ -43,6 +44,7 @@ router.get("/user", async (req,res)=>{
     }
 })
 
+//Create New User
 router.post("/user",async (req,res)=>{
     try{
         if(createUserSchema.validate(req.body).error){
@@ -69,6 +71,7 @@ router.post("/user",async (req,res)=>{
     }
 })
 
+//Update User
 router.put("/user",async (req,res)=>{
     try{
         result = await userController.updateUser(req)
@@ -87,6 +90,7 @@ router.put("/user",async (req,res)=>{
     }
 })
 
+//Delete User
 router.delete("/user",async (req,res)=>{
     try{
         result = await userController.deleteUser(req);
