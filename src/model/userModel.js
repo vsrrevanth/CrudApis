@@ -48,7 +48,6 @@ var createUser = async ({firstname,lastname,email,address,phonenumber}) => {
 
 // Update User
 var updateUser = async (fields, email) => {
-    console.log()
     try{
         const oldUserObj = getUser(email);
         if(Object.keys(fields).length == 0){
@@ -66,8 +65,7 @@ var updateUser = async (fields, email) => {
         }
     
     catch(error){
-        console.error(error)
-            return error;
+        return error;
     }
 }
 
@@ -79,11 +77,9 @@ var deleteUser = async (email) => {
     const conn = await getConnection(connection_params);
     var rows = await conn.query(sql,values)
     rows = rows[0];
-    console.log(rows);
     return rows['affectedRows'];
     }
     catch(error){
-        console.error(error);
         return error;
     }
 }

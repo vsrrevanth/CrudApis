@@ -4,6 +4,8 @@ const joi = require('joi')
 const userController = require("../controller/userController")
 const searchUserSchema = require("../schemas/searchUser")
 const createUserSchema = require("../schemas/createUser")
+const deleteUserSchema = require("../schemas/deleteUser")
+const updateUserSchema = require("../schemas/updateUser")
 
 //Get all Users
 router.get("/users", async (req, res) => {
@@ -36,10 +38,10 @@ router.get("/user", async (req,res)=>{
         if(user){
             return res.json(user);
         }
-        return res.json({"message": "unable to fetch user details"})
+        return res.status(404).json({"message": "unable to fetch user details"})
     }
     catch(error){
-        return res.json({error:error.message})
+        return res.status(400).json({error:error.message})
     }
 })
 
@@ -47,7 +49,6 @@ router.get("/user", async (req,res)=>{
 router.post("/user",async (req,res)=>{
     try{
         if(createUserSchema.validate(req.body).error){
-            console.log("Invalid schema")
             return res.status(400).send(createUserSchema.validate(req.body).error.details)
         }
         const existingUser = await userController.getUser(req.body.email);
@@ -72,10 +73,16 @@ router.post("/user",async (req,res)=>{
 //Update User
 router.put("/user",async (req,res)=>{
     try{
+        if(!req.query.email){
+            return res.status(400).json({"error": "Email missing"})
+        }
+        if(updateUserSchema.validate(req.body).error){
+            return res.status(400).send(updateUserSchema.validate(req.body).error.details)
+        }
         var user = await userController.getUser(req.query.email);
         if(user){
             user = await userController.updateUser(req)
-            return res.json(user);
+            return res.status(200).json({"message":"User updated successfully"});
         }
         else{
             return res.status(404).json({
@@ -94,6 +101,10 @@ router.put("/user",async (req,res)=>{
 //Delete User
 router.delete("/user",async (req,res)=>{
     try{
+        var email = req.query.email;
+        if(deleteUserSchema.validate({email:email}).error){
+            return res.status(400).send(deleteUserSchema.validate({email:email}).error.details)
+        }
         var user = await userController.getUser(req.query.email);
         if(user){
             await userController.deleteUser(req);

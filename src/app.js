@@ -3,12 +3,9 @@ const express = require('express')
 const path = require("path")
 const routes = require("./routes/userRoutes")
 const bodyParser = require("body-parser")
-const joi = require("joi");
 
 // Create the express app
 const app = express()
-console.log(__dirname)
-
 // Routes and middleware
 // app.use(/* ... */)
 // app.get(/* ... */)
